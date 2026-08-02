@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1784878257740,
+      "tag": "0000_luxuriant_shen",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1785663343796,
+      "tag": "0001_flashy_infant_terrible",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785663788253,
+      "tag": "0002_abandoned_quasimodo",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785663927774,
+      "tag": "0003_robust_sinister_six",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785664076569,
+      "tag": "0004_magical_blizzard",
+      "breakpoints": true
+    }
+  ]
+}
