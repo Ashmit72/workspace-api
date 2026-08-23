@@ -2,7 +2,7 @@ import { Injectable, Inject, NotFoundException, ConflictException } from '@nestj
 import { DRIZZLE } from '../db/drizzle.module';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../db/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
@@ -151,5 +151,46 @@ async remove(orgId: string) {
   // then the parent
   await this.db.delete(schema.organizations).where(eq(schema.organizations.id, orgId));
   return { message: 'Organization deleted' };
+}
+
+async createCustomRole(orgId: string, name: string, permissionIds: string[]) {
+  // 1. prevent duplicate role names within the same org
+  const [existing] = await this.db
+    .select()
+    .from(schema.roles)
+    .where(and(eq(schema.roles.organizationId, orgId), eq(schema.roles.name, name)));
+  if (existing) {
+    throw new ConflictException(`Role "${name}" already exists in this organization`);
+  }
+
+  // 2. validate the permission IDs actually exist in the catalog
+  const validPermissions = await this.db
+    .select()
+    .from(schema.permissions)
+    .where(inArray(schema.permissions.id, permissionIds));
+
+  if (validPermissions.length !== permissionIds.length) {
+    throw new NotFoundException('One or more permission IDs are invalid');
+  }
+
+  // 3. create the role
+  const [role] = await this.db
+    .insert(schema.roles)
+    .values({ name, organizationId: orgId, isSystem: false })
+    .returning();
+
+  // 4. staple the permissions
+  await this.db.insert(schema.rolePermissions).values(
+    permissionIds.map((permissionId) => ({ roleId: role.id, permissionId })),
+  );
+
+  return role;
+}
+
+async getRolesForOrg(orgId: string) {
+  return this.db
+    .select()
+    .from(schema.roles)
+    .where(eq(schema.roles.organizationId, orgId));
 }
 }
