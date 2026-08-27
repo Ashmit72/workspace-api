@@ -41,3 +41,22 @@ export const rolePermissions = pgTable('role_permissions', {
 }, (t) => ({
   pk: primaryKey({ columns: [t.roleId, t.permissionId] }),
 }));
+
+export const projects = pgTable('projects', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  createdBy: uuid('created_by').references(() => users.id).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const taskStatusEnum = pgEnum('task_status', ['todo', 'in_progress', 'done']);
+
+export const tasks = pgTable('tasks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: text('title').notNull(),
+  status: taskStatusEnum('status').notNull().default('todo'),
+  projectId: uuid('project_id').references(() => projects.id, { onDelete: 'cascade' }).notNull(),
+  authorId: uuid('author_id').references(() => users.id).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
